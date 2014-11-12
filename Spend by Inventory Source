@@ -1,0 +1,19 @@
+select advertisable_eid,
+sum(CASE WHEN month ='10-01-2014' and network  = 'Facebook' and inventory_source = 'Facebook Newsfeed' then media_cost else 0 end)/1000000 as FBX_NF_Spend_OCT,
+sum(CASE WHEN month ='10-01-2014' and network  = 'Facebook' and inventory_source = 'Facebook' then media_cost else 0 end)/1000000 as FBX_RHS_Spend_OCT,
+sum(CASE WHEN month ='10-01-2014' and inventory_source = 'WCA' then media_cost else 0 end)/1000000 as WCA_Spend_OCT,
+sum(CASE WHEN month ='10-01-2014' and network  != 'Facebook' then media_cost else 0 end)/1000000 as Web_Spend_OCT,
+sum(CASE WHEN month ='11-01-2014' and network  = 'Facebook' and inventory_source = 'Facebook Newsfeed' then media_cost else 0 end)/1000000 as FBX_NF_Spend_NOV,
+sum(CASE WHEN month ='11-01-2014' and network  = 'Facebook' and inventory_source = 'Facebook' then media_cost else 0 end)/1000000 as FBX_RHS_Spend_NOV,
+sum(CASE WHEN month ='11-01-2014' and inventory_source = 'WCA' then media_cost else 0 end)/1000000 as WCA_Spend_NOV,
+sum(CASE WHEN month ='11-01-2014' and network  != 'Facebook' then media_cost else 0 end)/1000000 as Web_Spend_NOV
+from deliroll_rtbcube2
+where month >= '10-01-2014'
+and advertisable_eid IN
+(
+SELECT a.eid
+FROM advertisables a 
+JOIN organizations o ON o.id = a.organization_id
+WHERE o.ops_organization_id = '8677'
+)
+group by advertisable_eid
