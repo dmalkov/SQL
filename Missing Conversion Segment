@@ -1,0 +1,48 @@
+select distinct o.id
+	, a.eid
+	, a.name
+	, u.email
+	,u.first_name || ' ' || u.last_name as name
+from organizations o
+join advertisables a on a.organization_id = o.id
+join ads on ads.advertisable_id = a.id
+join campaigns c on c.advertisable_id = a.id
+join users u on u.organization_id = o.ops_organization_id
+where (u.first_name like 'Deligh%')
+order by 4
+
+--list of advertisers that don't have conversion segments and their email
+select 	a.eid
+	, a.name as adv_name
+	, array_agg(distinct r.type)
+	, case when u.organization_role = 'admin' then u.email else null end as primary_email
+	, case when u.organization_role = 'user' then u.email else null end as secondary_email
+	from segments s
+join pixels p on p.id = s.pixel_id
+join advertisables a on a.id = p.advertisable_id
+join organizations o on a.organization_id = o.id
+join users u on u.organization_id = o.id
+join rules r on r.pixel_id = p.id
+where a.eid IN ()
+group by a.eid, a.name, u.email, u.organization_role
+
+--campaigns that are assigned to Delight
+select o.id
+	, round(media_cost/1e6),2) as spend
+from deliroll_adcube d
+join advertisables a on a.eid = d.advertisable_eid
+join organizations o on a.organization_id = o.id
+where day between '2014-03-15' and '2014-04-16'
+and o.id IN
+(select distinct o.id
+	--, o.name
+	--, u.email
+	--,u.first_name || ' ' || u.last_name as name
+from organizations o
+--join advertisables a on a.organization_id = o.id
+--join ads on ads.advertisable_id = a.id
+--join campaigns c on c.advertisable_id = a.id
+join users u on u.organization_id = o.ops_organization_id
+where o.ops_organization_id = '8677'
+)
+
