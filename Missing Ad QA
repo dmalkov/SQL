@@ -1,0 +1,32 @@
+select
+o.eid as org_eid
+, adv.eid as adv_eid
+, c.eid as c_eid
+, c.original_start_date as c_start
+,array_agg(distinct ad_format_id)
+
+from advertisables adv
+
+join organizations o on adv.organization_id=o.id
+join users u on o.id=u.organization_id
+join users ops on ops.organization_id = o.ops_organization_id
+join users sales on sales.organization_id = o.sales_organization_id
+join campaigns c on adv.id=c.advertisable_id
+join campaign_budget_allocations cba on cba.campaign_id=c.id
+join adgroups adg on c.id=adg.campaign_id
+join adgroup_ads adgads on adg.id=adgads.adgroup_id
+join ads on ads.id = adgads.ad_id
+
+
+where
+ads.is_active = 't'
+and ads.status in ('approved' , 'admin_review')
+and adgads.status = 'approved'
+and adg.status = 'approved'
+and cba.network in ('g','x')
+and c.status = 'approved'
+and o.eid in (
+)
+
+group by 1,2,3,4
+
