@@ -1,0 +1,12 @@
+SELECT 
+	orgs.eid,
+advs.eid,
+	ops.username as ops_name,
+	sales.username as sales_name,
+	customers.username as customer_name
+FROM advertisables advs
+JOIN organizations orgs ON advs.organization_id = orgs.id
+JOIN users ops ON ops.organization_id = orgs.ops_organization_id
+JOIN users sales ON sales.organization_id = orgs.sales_organization_id
+JOIN users customers ON customers.organization_id = orgs.id
+WHERE advertisable_eid in ()
