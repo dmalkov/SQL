@@ -1,0 +1,76 @@
+select 
+o.eid as organization_eid,
+a.eid as advertisable_eid, 
+a.name as Advertisable,  
+count(c.eid) as num_total_campaigns, 
+count(f.campaign_id) as num_facebook_campaigns, 
+count(f.campaign_id) -(sum(CASE WHEN f.is_fbx_newsfeed = 't' THEN 1 ELSE 0 END) ) as num_rhr_campaigns, 
+sum(CASE WHEN f.is_fbx_newsfeed = 't' THEN 1 ELSE 0 END) as num_newsfeed_campaigns,  
+count(n.campaign_id) as num_fbx_liquid,
+count(m.campaign_id) as num_web_liquid,
+a.is_cm_enabled as google_cookie_matching_enabled, 
+count(g.campaign_id) as num_google_campaigns, 
+a.is_x_cm_enabled as appnexus_cookie_matching_enabled, 
+count(x.campaign_id) as num_appnexus_campaigns, 
+u.first_name || ' ' || u.last_name as Ops
+from
+advertisables a 
+join campaigns c on c.advertisable_id = a.id
+left join 
+	(select
+	campaign_id, 
+	is_fbx_newsfeed
+	from campaign_budget_allocations
+	where network = 'f' 
+	and allocation > 0) f
+		on f.campaign_id = c.id	
+left join 
+	(select
+	campaign_id, 
+	is_fbx_newsfeed
+	from campaign_budget_allocations
+	where network = 'g' 
+	and allocation > 0) g
+		on g.campaign_id = c.id	
+left join 
+	(select
+	campaign_id, 
+	is_fbx_newsfeed
+	from campaign_budget_allocations
+	where network = 'x' 
+	and allocation > 0) x
+		on x.campaign_id = c.id	
+left join 
+	(select distinct(c.id) as campaign_id
+	from campaigns c 
+	join adgroups adg on c.id=adg.campaign_id
+	join adgroup_ads ada on ada.adgroup_id=adg.id
+	join ads ad on ada.ad_id=ad.id
+	where ad.is_fb_dynamic='t') n
+		on c.id=n.campaign_id
+left join 
+	(select distinct(c.id) as campaign_id
+	from campaigns c 
+	join adgroups adg on c.id=adg.campaign_id
+	join adgroup_ads ada on ada.adgroup_id=adg.id
+	join ads ad on ada.ad_id=ad.id
+	where ad.is_liquid='t') m
+		on c.id=m.campaign_id
+join organizations o on o.id = a.organization_id
+left join users u on u.organization_id = o.ops_organization_id
+left join users u2 on u2.organization_id = o.sales_organization_id
+where
+a.is_active = 't'
+and c.is_active = 't'
+and c.status in ('approved')
+and u.username like '%hussein%' --Insert exact or defining segment of ops username
+group by 
+o.eid,
+a.eid, 
+a.name,  
+a.is_cm_enabled, 
+a.is_x_cm_enabled, 
+a.is_f_cm_enabled,  
+u.first_name,
+u.last_name
+order by 1, 2;
