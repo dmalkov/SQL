@@ -1,0 +1,26 @@
+SELECT
+  c.eid as campaign_eid, 
+  c.name as campaign_name,
+  c.is_rtb,
+  adg.eid as adgroup_eid, 
+  adg.name as adgroup_name,
+  d.advertisement_eid,
+  a.name as ad_name,
+  d.day_by_hour
+  , d.network || ' '|| d.inventory_source as network
+  , sum(d.media_cost*0.000001) as spend
+  , sum(case when d.event_type='Impression' then d.number_of_events else 0 end)as imps
+  , sum(case when d.event_type='Click' then d.number_of_events else 0 end) as clicks
+  , sum(case when d.event_type='Click-through Conversion' then d.number_of_events else 0 end) as ctc
+  , sum(case when d.event_type='View-through Conversion' then d.number_of_events else 0 end) as vtc
+FROM 
+ campaigns c  
+  join adgroups adg on c.id=adg.campaign_id 
+  join adgroup_ads ada on adg.id=ada.adgroup_id
+  join ads a on ada.ad_id=a.id 
+  join deliroll_adcube_with_ads30_table d on adg.eid=d.adgroup_eid and a.eid=d.advertisement_eid
+WHERE
+d.day>'2014-09-01' and d.campaign_eid in ('2JK33R2DPFFF3P6AWHLNQS')
+group by 1,2,3,4,5,6,7,8,9
+--having sum(d.number_of_events)>10
+ ;
