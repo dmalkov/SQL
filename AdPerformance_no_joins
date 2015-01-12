@@ -1,0 +1,15 @@
+SELECT
+  d.campaign_eid,
+  d.adgroup_eid,
+  d.advertisement_eid,
+-- d.network|| d.inventory_source as network,
+  d.day
+  , sum(d.number_of_events) as imps
+FROM 
+deliroll_adcube_with_ads30_table d
+WHERE
+d.event_type='Impression'  
+and d.advertisement_eid in ('DCBNKOIQLRA5VNWJQUUTPV','72I7COGJ6ZCV7MHUFO4IGQ')
+and d.day>'2014-09-25'
+group by 1,2,3,4
+ ;
