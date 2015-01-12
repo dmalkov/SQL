@@ -1,0 +1,25 @@
+SELECT
+    d.advertisable_eid
+  , d.campaign_eid
+  , c.name AS c_name
+--  , c.is_rtb
+--  , c.status as campaign_status
+--  , c.updated_date 
+ , d.bidding_strategy
+ , d.day
+ , d.network
+  , sum(d.media_cost*0.000001) as spend
+  , sum(case when d.event_type='Impression' then d.number_of_events else 0 end)as imps
+  , sum(case when d.event_type='Click' then d.number_of_events else 0 end) as clicks
+  , sum(case when d.event_type='Click-through Conversion' then d.number_of_events else 0 end) as ctc
+  , sum(case when d.event_type='View-through Conversion' then d.number_of_events else 0 end) as vtc
+--  , sum(d.uniques)
+FROM 
+  campaigns c
+  join deliroll_adcube30_table d on c.eid=d.campaign_eid 
+WHERE 
+--and c.approved_mirrors ~'x|g'  and d.event_type='Impression'
+ d.day > '2014-09-06'
+ and d.campaign_eid in ( 'J76PAIM6CZFX3ERTEB62XK','VAMO36V3KFEDRP7R7SHFN4','NUCDCVHUJVAAHNYDW4XUJO','J6S4V7GVFVBFJOXCMSQJ62','Y4ANQGLJJNAPLCWWMKXQMU','Y5DCFI4A5RDENCAH3SZ5XS')
+group by 1,2,3,4,5,6
+ ;
