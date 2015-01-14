@@ -1,0 +1,34 @@
+SELECT distinct o.eid, customers.email
+FROM advertisables adv
+JOIN organizations o ON adv.organization_id=o.id
+JOIN campaigns c ON adv.id=c.advertisable_id
+JOIN campaign_budget_allocations cba ON cba.campaign_id=c.id
+JOIN users ops ON ops.organization_id = o.ops_organization_id
+JOIN users sales ON sales.organization_id = o.sales_organization_id
+JOIN users customers ON customers.organization_id = o.id
+WHERE
+		cba.network <> 'f'
+			AND c.status = 'approved'
+			AND o.ops_organization_id = '8677'
+			AND customers.locale IN  ('en_US')
+			AND customers.organization_role = 'admin'
+			AND (o.sales_organization_id IN ('8683','29645','105096','105103','86359','86361','86368','86094','86367','86314','105097','86362','105102','86352','86350','105098','86353'
+	) OR sales.role IN ('delight'))
+	AND o.eid IN (select o.eid
+			from organizations as o
+			left join advertisables as adv on adv.organization_id=o.id
+			left join campaigns as c on adv.id=c.advertisable_id
+				where c.status IN ('approved','paused','completed')
+				group by 1
+				having min(c.start_date) =  current_date - integer '15' OR
+min(c.start_date) between current_date - integer '15' and current_date - integer '14')
+	AND o.eid NOT IN
+	(SELECT o.eid
+	FROM advertisables adv
+	JOIN organizations o ON adv.organization_id=o.id
+	JOIN campaigns c ON adv.id=c.advertisable_id
+	JOIN campaign_budget_allocations cba ON cba.campaign_id=c.id
+	WHERE cba.network = 'f')
+group by 1,2
+having min(c.start_date) =  current_date - integer '15' OR
+ min(c.start_date) between current_date - integer '15' and current_date - integer '14'
