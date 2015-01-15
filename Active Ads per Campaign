@@ -1,0 +1,32 @@
+SELECT 
+adv.eid as advertisable_eid, 
+c.eid as campaign_eid, 
+c.name as campaign_name, 
+c.is_rtb, 
+--cba.is_fbx_newsfeed, 
+c.status as campaign_status, 
+c.updated_date,
+adg.eid as adgroup, 
+adg.name as adgroup_name,
+adga.status,
+adga.updated_date,
+a.eid as ad_eid,
+a.name as ad_name,
+a.html as html,
+a.display_url_override
+--count(case when adga.status='approved' then 1 else null end) as active_ads
+  FROM 
+ advertisables adv
+	join campaigns c on c.advertisable_id=adv.id
+	join campaign_budget_allocations cba on cba.campaign_id=c.id
+	join adgroups adg on adg.campaign_id = c.id 
+	join adgroup_ads adga on adga.adgroup_id = adg.id
+	join ads a on adga.ad_id=a.id
+ where
+ --c.status='approved' and
+ adv.eid = '5M4GY2CGYRGDDNSGQUEOI7'
+--  c.eid in ('D5EOCQVYFRCSNIAP3TBFSQ')
+ --  adg.status='approved' and adga.status='approved' and a.is_active='t'
+ --AND cba.network='f'
+group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14
+;
