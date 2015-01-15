@@ -1,0 +1,18 @@
+Select 
+u2.email as opser, 
+u.email as advertisable_admin, 
+advertisables.eid as adv_eid, 
+advertisables.name as adv_name, 
+pixels.status as pixel_status,
+pixels.dropped_code_date
+from organizations 
+join advertisables on advertisables.organization_id=organizations.id
+join pixels on advertisables.id=pixels.advertisable_id 
+join users u  on u.organization_id=organizations.id
+join users u2 on u2.organization_id=organizations.ops_organization_id
+where
+advertisables.status='approved' and u.organization_role='admin'
+and pixels.status='dropped' and pixels.dropped_code_date>'2014-05-01'
+group by 1,2,3,4,5,6
+order by 1
+ ;
