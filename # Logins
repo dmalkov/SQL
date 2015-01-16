@@ -1,0 +1,17 @@
+select
+o.eid, o.name, 
+count( distinct c.id) as no_of_campaigns,
+sum(distinct c.budget) as total_budget,
+count (distinct case when e.type='user_sign_in' then e.id  else null end) as no_of_logins
+from
+events e 
+join event_associations ea on ea.event_id=e.id
+join event_bundles eb on ea.event_bundle_id=eb.id
+join organizations o on e.organization_id=o.id
+join advertisables adv on adv.organization_id=o.id
+join campaigns c on c.advertisable_id=adv.id
+join users u on o.id=u.organization_id
+where
+e.type='user_sign_in' and e.created_date>='2015-01-01'
+group by 1,2
+LIMIT 10;
