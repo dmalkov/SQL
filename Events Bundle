@@ -1,0 +1,4 @@
+join users u on o.ops_organization_id=u.organization_id
+join event_bundles eb on eb.id=c.event_bundle_id 
+join event_associations ea on ea.event_bundle_id=eb.id
+join events e on e.id=ea.event_id 
