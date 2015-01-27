@@ -1,0 +1,6 @@
+select id, username, first_name, last_name 
+ from users 
+ where 
+ email in (
+)
+;
