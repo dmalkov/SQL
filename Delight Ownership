@@ -1,0 +1,8 @@
+JOIN users sales ON sales.organization_id = o.sales_organization_id
+JOIN users customers ON customers.organization_id = o.id
+
+
+--AND customers.locale IN  ('en_US')
+			AND customers.organization_role = 'admin'
+			AND (o.sales_organization_id IN ('8683','29645','105096','105103','86359','86361','86368','86094','86367','86314','105097','86362','105102','86352','86350','105098','86353'
+	) OR sales.role IN ('delight'))
