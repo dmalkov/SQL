@@ -1758,5 +1758,6 @@ WHERE ad.advertisable_eid IN ('LYIZTKN3YVC67EZNFZ572U',
 'MQQHEMXLNRFARGBZX33CQ6')
 
 AND day BETWEEN '01-22-2015' and '01-28-2015'
+--AND day between (current_date - interval '7' day)::timestamp::date and current_date
 
 group by 1,2,3,4,5,6,7,8
