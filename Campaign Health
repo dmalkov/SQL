@@ -63,7 +63,6 @@ where
 a.is_active = 't'
 and c.is_active = 't'
 and c.status in ('approved')
-and u.username like '%hussein%' --Insert exact or defining segment of ops username
 group by 
 o.eid,
 a.eid, 
