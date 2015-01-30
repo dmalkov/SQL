@@ -1,0 +1,34 @@
+SQL Query										
+SELECT										
+	ad.campaign_eid as "Campaign EID",									
+	ad.advertisable_eid as "Adv EID",									
+	o.eid as "ORG EID",									
+	u.name as AM,									
+	c.status,									
+	c.name,									
+	c.campaign_type,									
+	c.budget,									
+	sum(ad.media_cost/1000000.0) as spend									
+FROM deliroll_adcube as ad										
+										
+LEFT JOIN (select eid,organization_id from advertisables) as a on a.eid = ad.advertisable_eid										
+LEFT JOIN (select id,eid,ops_organization_id,sales_organization_id from organizations) as o on o.id = a.organization_id										
+LEFT JOIN (select organization_id, CONCAT(first_name,' ',last_name) as name from users) as u on u.organization_id = o.ops_organization_id										
+LEFT JOIN 	(select ca.id,ca.eid,ca.budget * 28 as budget,ca.status,ca.name,cb.campaign_type from campaigns as ca									
+			LEFT JOIN(							
+			select 							
+				campaign_id, 						
+				CASE						
+					WHEN network = 'f' and is_fbx_newsfeed = 't'					
+						THEN 'NF'				
+					WHEN network = 'f' and is_fbx_newsfeed = 'f'					
+						THEN 'RHC'				
+					ELSE 'WEB'					
+				END as campaign_type						
+			from campaign_budget_allocations							
+			group by 1,2) as cb on cb.campaign_id = ca.id							
+			) as c on c.eid = ad.campaign_eid							
+where day BETWEEN '01-01-2014' and '02-01-2014'										
+AND o.ops_organization_id = '8677'										
+AND o.sales_organization_id IN(8683,29645,105096,105103,86359,	86361,	86368,	86094,	86367,	86314,	105097,	86362,	105102,	86352,	86350,
+group by 1,2,3,4,5,6,7,8										
