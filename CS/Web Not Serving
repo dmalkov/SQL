@@ -6,19 +6,25 @@ adv.eid as adv_eid
 , c.start_date
 , round(c.budget,2) as daily_budget
 , c.status as c_status
-, array_to_string(array_agg(distinct cba.network || cba.allocation ), ';') as allocation
+--, d.error_string as WEB_TROB
+
 FROM 
 advertisables adv 
 join campaigns c on c.advertisable_id = adv.id 
-join campaign_budget_allocation cba on c.id=cba.campaign_id
 join adgroups adg on adg.campaign_id=c.id
 join adgroup_ads ada on ada.adgroup_id=adg.id
 join ads a on a.id=ada.ad_id
 left join deliroll_adcube30 d on c.eid=d.campaign_eid
+JOIN organizations o ON adv.organization_id=o.id
+JOIN users sales ON sales.organization_id = o.sales_organization_id
+
 where 
 c.status='approved' and (c.approved_mirrors like '%g%' OR c.approved_mirrors like '%x%') and adg.status='approved' and ada.status='approved' and c.start_date<now() 
-and c.created_date> now() - interval '2 weeks' 
-group by 1,2,3,4,5,6,7,8,9
+
+AND (o.sales_organization_id IN ('8683','29645','105096','105103','86359','86361','86368','86094','86367','86314','105097','86362','105102','86352','86350','105098','86353'
+	) OR sales.role IN ('delight'))
+	
+group by 1,2,3,4,5,6,7
 having case when sum(case when d.event_type='Impression'  and d.day>current_date - integer '2' then d.number_of_events else 0 end) >0 then 'active' else 'inactive' end ='inactive'
 order by 2,4
 ;
