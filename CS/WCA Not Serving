@@ -1,0 +1,52 @@
+--THIS WILL TAKE A WHILE ~500,000ms--
+
+select 
+adv.eid as adv_eid
+, adv.name as adv_name
+, 'act_'||fa.external_id as fb_id
+, c.eid as c_eid
+, c.name as c_name
+, c.start_date
+, round(c.budget,2) as daily_budget
+, c.status as c_status
+, fca.error_string as fca_TROB
+--, fbx.error_string as fbx_TROB
+
+FROM 
+advertisables adv 
+JOIN facebook_accounts fa on adv.id=fa.advertisable_id
+JOIN organizations o ON adv.organization_id=o.id
+JOIN campaigns c ON adv.id=c.advertisable_id
+JOIN users sales ON sales.organization_id = o.sales_organization_id
+
+---FOR WCA---
+
+JOIN users customers ON customers.organization_id = o.id
+JOIN pixels p on adv.id=p.advertisable_id 
+JOIN segments s on p.id=s.pixel_id
+
+LEFT JOIN deliroll_adcube30 d on c.eid=d.campaign_eid
+JOIN adgroups adg on adg.campaign_id=c.id
+JOIN adgroup_ads ada on ada.adgroup_id=adg.id
+JOIN ads on ads.id = ada.ad_id
+
+--- Replace FBX/WCA Network Below ---
+JOIN facebook_custom_audiences fca on fca.segment_id=s.id
+--JOIN facebook_campaigns fbx on fbx.campaign_id=c.id
+
+where 
+c.status='approved' and c.approved_mirrors like '%f%' and adg.status='approved' and ada.status='approved' and ads.status='approved' and c.start_date<now() 
+
+--FOR WCA--
+and c.is_rtb='f'
+
+	--AND customers.organization_role = 'admin'
+	AND (o.sales_organization_id IN ('8683','29645','105096','105103','86359','86361','86368','86094','86367','86314','105097','86362','105102','86352','86350','105098','86353'
+	) OR sales.role IN ('delight'))
+
+--and customers.locale IN  ('en_US')
+---and c.created_date> now() - interval '2 weeks' 
+group by 1,2,3,4,5,6,7,8,9
+having case when sum(case when d.event_type='Impression'  and d.day>current_date - integer '2' then d.number_of_events else 0 end) >0 then 'active' else 'inactive' end ='inactive'
+order by 2,4
+;
