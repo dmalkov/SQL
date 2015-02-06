@@ -2,6 +2,7 @@ select
 
 o.eid as organization_eid
 , a.eid as advertisable_eid 
+--, c.eid as campaign_eid
 --, a.name as Advertisable
 --, a.url as URL
 --, u.username as Email
@@ -10,8 +11,9 @@ o.eid as organization_eid
 
 --PERFORMANCE--
 , px.status as Pixel_Status
-, spend_dates.last_spend_date
-, sum( d.media_cost * 0.000001) as spend
+--, spend_dates.last_spend_date
+, sum(d.media_cost * 0.000001) as spend
+, sum(c.budget) as budget
 , sum(case when d.event_type='Impression' then d.number_of_events else 0 end) as impressions
 , sum(case when d.event_type='Click' then d.number_of_events else 0 end) as clicks
 , sum(case when d.event_type='Click-through Conversion' then d.number_of_events else 0 end) as ctc
@@ -1816,5 +1818,5 @@ and a.eid IN('GSTPN7MF5FCMNPWXWGWRFO',
 'KIADL66ZFNEQ3GFYME2V6E',
 'YYCPRT7SWJDF7MUPCSW534')
 
-group by 1,2,3,4
+group by 1,2,3
 order by 1,2;
