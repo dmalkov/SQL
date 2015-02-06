@@ -1,37 +1,44 @@
 select 
 
-o.eid as organization_eid,
-a.eid as advertisable_eid, 
-a.name as Advertisable,  
-a.url as URL,
-u.username as Email,
-u.first_name,
-u.last_name,
+o.eid as organization_eid
+, a.eid as advertisable_eid 
+--, a.name as Advertisable
+--, a.url as URL
+--, u.username as Email
+--, u.first_name
+--, u.last_name
 
 --PERFORMANCE--
-sum( d.media_cost * 0.000001) as spend,
-sum(case when d.event_type='Impression' then d.number_of_events else 0 end) as impressions
+, px.status as Pixel_Status
+, spend_dates.last_spend_date
+, sum( d.media_cost * 0.000001) as spend
+, sum(case when d.event_type='Impression' then d.number_of_events else 0 end) as impressions
 , sum(case when d.event_type='Click' then d.number_of_events else 0 end) as clicks
 , sum(case when d.event_type='Click-through Conversion' then d.number_of_events else 0 end) as ctc
-, sum(case when d.event_type='View-through Conversion' then d.number_of_events else 0 end) as vtc,
+, sum(case when d.event_type='View-through Conversion' then d.number_of_events else 0 end) as vtc
+
 
 --PRODUCT MIX--
-count(c.eid) as num_total_campaigns, 
-count(f.campaign_id) as num_facebook_campaigns, 
-count(f.campaign_id) -(sum(CASE WHEN f.is_fbx_newsfeed = 't' THEN 1 ELSE 0 END) ) as num_rhc_campaigns, 
-sum(CASE WHEN f.is_fbx_newsfeed = 't' THEN 1 ELSE 0 END) as num_newsfeed_campaigns,  
-count(w.campaign_id) as num_web_campaigns, 
-count(c.eid) - count(f.campaign_id) - count(w.campaign_id) as num_other,
-count(n.campaign_id) as num_fbx_liquid,
-count(l.campaign_id) as num_web_liquid,
---count(x.campaign_id) as num_appnexus_campaigns, 
-count(p.campaign_id) as num_paused
---u.first_name || ' ' || u.last_name as Ops
+, count(c.eid) as num_total_campaigns
+, count(f.campaign_id) as num_facebook_campaigns
+, count(f.campaign_id) -(sum(CASE WHEN f.is_fbx_newsfeed = 't' THEN 1 ELSE 0 END) ) as num_rhc_campaigns
+, sum(CASE WHEN f.is_fbx_newsfeed = 't' THEN 1 ELSE 0 END) as num_newsfeed_campaigns
+, count(w.campaign_id) as num_web_campaigns
+, count(c.eid) - count(f.campaign_id) - count(w.campaign_id) as num_other
+, count(n.campaign_id) as num_fbx_liquid
+, count(l.campaign_id) as num_web_liquid
+--, count(x.campaign_id) as num_appnexus_campaigns
+, count(p.campaign_id) as num_paused
+--, u.first_name || ' ' || u.last_name as Ops
 
 from
 advertisables a 
 join campaigns c on c.advertisable_id = a.id
 join deliroll_adcube30 d on c.eid=d.campaign_eid
+join organizations o on a.organization_id=o.id
+join users u on u.organization_id = o.id
+join deli_campaign_initial_spend_dates as spend_dates on c.eid=spend_dates.campaign_eid
+left join pixels px on px.advertisable_id=a.id
 
 --FBX RHC & NF--
 left join 
@@ -58,6 +65,7 @@ left join
 	join ads ad on ada.ad_id=ad.id
 	where ad.is_fb_dynamic='t') n
 		on c.id=n.campaign_id
+--WEB Liquid--
 left join 
 	(select distinct(c.id) as campaign_id
 	from campaigns c 
@@ -66,6 +74,7 @@ left join
 	join ads ad on ada.ad_id=ad.id
 	where ad.is_liquid='t' and (c.approved_mirrors like '%g%' OR c.approved_mirrors like '%x%')) l
 		on c.id=l.campaign_id
+--PAUSED Camps--
 left join 
 	(select distinct(c.id) as campaign_id
 	from campaigns c
@@ -73,16 +82,14 @@ left join
 	and c.status='paused') p
 		on c.id=p.campaign_id
 
-join organizations o on a.organization_id=o.id
-join users u on u.organization_id = o.id
-
 where
 
+d.day>current_date - integer '8'
 --a.is_active = 't'
 --and c.is_active = 't'
 --and c.status in ('approved')
 
-a.eid IN('GSTPN7MF5FCMNPWXWGWRFO',
+and a.eid IN('GSTPN7MF5FCMNPWXWGWRFO',
 '6QKXSER3SJCSPKDZ43NQCO',
 'KOOGU4DVHJF5JNBFWMHUX7',
 'VEXVLOTMWBC27PLIBKRO53',
@@ -1809,13 +1816,5 @@ a.eid IN('GSTPN7MF5FCMNPWXWGWRFO',
 'KIADL66ZFNEQ3GFYME2V6E',
 'YYCPRT7SWJDF7MUPCSW534')
 
-group by 
-o.eid,
-a.eid, 
-a.name,  
-u.username,
-u.first_name,
-u.last_name,
-a.url
-
-order by 1, 2;
+group by 1,2,3,4
+order by 1,2;
