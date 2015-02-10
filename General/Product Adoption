@@ -1,4 +1,4 @@
-SQL Query										
+										
 SELECT										
 	ad.campaign_eid as "Campaign EID",									
 	ad.advertisable_eid as "Adv EID",									
