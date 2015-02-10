@@ -30,5 +30,5 @@ LEFT JOIN 	(select ca.id,ca.eid,ca.budget * 28 as budget,ca.status,ca.name,cb.ca
 			) as c on c.eid = ad.campaign_eid							
 where day BETWEEN '01-01-2014' and '02-01-2014'										
 AND o.ops_organization_id = '8677'										
-AND o.sales_organization_id IN(8683,29645,105096,105103,86359,	86361,	86368,	86094,	86367,	86314,	105097,	86362,	105102,	86352,	86350,
+AND o.sales_organization_id IN(8683,29645,105096,105103,86359,	86361,	86368,	86094,	86367,	86314,	105097,	86362,	105102,	86352,	86350)
 group by 1,2,3,4,5,6,7,8										
