@@ -10,7 +10,7 @@ o.eid as organization_eid
 --, u.last_name
 
 --PERFORMANCE--
-, px.status as Pixel_Status
+, px.status as pixel_status
 --, spend_dates.last_spend_date
 , sum(d.media_cost * 0.000001) as spend
 , sum(c.budget) as budget
@@ -86,7 +86,12 @@ left join
 
 where
 
-d.day>current_date - integer '8'
+--DATE FILTERS--
+d.day>current_date - integer '8' --INTERVAL DATE RANGE
+--and day BETWEEN '02-02-2015' and '02-09-2015' --SPECIFIC DATE RANGE
+--and day between (current_date - interval '7' day)::timestamp::date and current_date --SPECIFIC DATE RANGE WITH INTERVAL
+
+--ACTIVE STATUS--
 --a.is_active = 't'
 --and c.is_active = 't'
 --and c.status in ('approved')
@@ -1818,7 +1823,7 @@ and a.eid IN('GSTPN7MF5FCMNPWXWGWRFO',
 'KIADL66ZFNEQ3GFYME2V6E',
 'YYCPRT7SWJDF7MUPCSW534')
 
---AND u.organization_role = 'admin'
+--and u.organization_role = 'admin'
 --			AND o.sales_organization_id IN ('8683','29645','105096','105103','86359','86361','86368','86094','86367','86314','105097','86362','105102','86352','86350','105098','86353')
 
 group by 1,2,3
