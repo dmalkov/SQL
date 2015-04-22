@@ -1,0 +1,16 @@
+select credit_card_processor_merchants.id,
+credit_card_processor_merchants.merchant_location_id,
+credit_card_processor_merchants.processor_merchant_id,
+credit_card_processor_merchants.source_type,
+ccpm_details.free_trial_detail,
+ccpm_details.downgrade_reason,
+ccpm_details.downgrade_date,
+products.type,
+products.enabled,
+merchant_locations.is_claimed,
+merchant_locations.claimed_at
+from credit_card_processor_merchants
+left join ccpm_details on credit_card_processor_merchants.id=ccpm_details.credit_card_processor_merchant_id
+left join products on credit_card_processor_merchants.merchant_location_id=products.merchant_location_id 
+left join merchant_locations on products.merchant_location_id=merchant_locations.id
+where source_type not like "%nab%" and ((products.type like "insights%" and products.enabled = 1) or products.id is NULL);
