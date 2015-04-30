@@ -1,0 +1,32 @@
+select ccpm.id internal_id
+,ccpm.merchant_location_id location_id
+,ccpm.processor_merchant_id mid
+,ccpm.source_type partner
+,ccpm_details.free_trial_detail ft_detail
+,ccpm_details.downgrade_reason dg_reason
+,ccpm_details.downgrade_date dg_date
+,products.type
+,merchant_locations.claimed_at
+,merchant_locations.yelp_id
+,yelp_businesses.review_count
+,yelp_businesses.average_rating
+,insights_weekly_summaries.revenue_this_week weekly_revenue
+
+from credit_card_processor_merchants ccpm
+left join ccpm_details on ccpm.id=ccpm_details.credit_card_processor_merchant_id
+left join products on ccpm.merchant_location_id=products.merchant_location_id 
+left join merchant_locations on products.merchant_location_id=merchant_locations.id
+left join yelp_businesses on merchant_locations.yelp_id=yelp_businesses.yelp_id
+left join insights_weekly_summaries on merchant_locations.merchant_id=insights_weekly_summaries.merchant_location_id
+
+where 
+-- source_type = "MCPS::Merchant" 
+-- and source_type not like "%nab%" 
+((products.type like "insights%" 
+and products.enabled = 1) or products.id is NULL)
+-- and downgrade_reason <> ''
+and is_claimed = 1
+and merchant_locations.claimed_at between (current_date - interval '5' day) and current_date 
+-- and merchant_locations.claimed_at between (current_date - interval '7' day)::timestamp::date and current_date -- SPECIFIC DATE RANGE WITH INTERVAL
+
+GROUP BY 3
