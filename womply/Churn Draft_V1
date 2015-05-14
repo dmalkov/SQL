@@ -1,0 +1,38 @@
+SELECT 
+ccpm.id internal_id
+,ccpm.merchant_location_id location_id
+,ccpm.processor_merchant_id mid
+,ccpm.source_type partner
+-- ,ccpm_details.free_trial_detail ft_detail
+,ccpm_details.downgrade_reason dg_reason
+-- ,ccpm_details.downgrade_date dg_date
+-- ,products.type
+,merchant_locations.claimed_at
+-- ,merchant_locations.yelp_id
+-- ,yelp_businesses.review_count
+-- ,yelp_businesses.average_rating
+, CASE WHEN merchant_locations.yelp_business_id IS NULL THEN 0 ELSE 1 END yelp_id
+, CASE WHEN merchant_locations.google_place_id IS NULL THEN 0 ELSE 1 END goog_id
+, CASE WHEN merchant_locations.open_table_business_id IS NULL THEN 0 ELSE 1 END ot_id
+, CASE WHEN merchant_locations.foursquare_venue_id IS NULL OR merchant_locations.foursquare_venue_id = 'UNMATCHED' THEN 0 ELSE 1 END fs_id
+, sum(insights_monthly_summaries.revenue_this_month) monthly_revenue
+-- ,merchant_locations.category category
+
+from credit_card_processor_merchants ccpm
+left join ccpm_details on ccpm.id=ccpm_details.credit_card_processor_merchant_id
+left join products on ccpm.merchant_location_id=products.merchant_location_id 
+left join merchant_locations on products.merchant_location_id=merchant_locations.id
+-- left join yelp_businesses on merchant_locations.yelp_id=yelp_businesses.yelp_id
+left join insights_monthly_summaries on merchant_locations.merchant_id=insights_monthly_summaries.merchant_location_id
+
+where 
+-- source_type like '%USMS%'
+-- and source_type not like "%nab%" 
+((products.type like "insights%" 
+and products.enabled = 1) or products.id is NULL)
+-- and (downgrade_reason <> '')
+-- and bill_for_essentials = 1
+and is_claimed = 1
+and claimed_at between '2014-07-01' and (current_date) -- TOGGLE CLAIMED_DATE / DG DATE FOR CLAIMEDS / DOWNGRADES
+
+GROUP BY 3
