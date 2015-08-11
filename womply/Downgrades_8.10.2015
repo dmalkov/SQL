@@ -1,0 +1,37 @@
+select merchant_location_id, MID, partner_name, claimed_at, activate_date, downgrade_date, datediff(downgrade_date, claimed_at) as days_to_dg
+    FROM(
+        SELECT id as product_id, type, merchant_location_id, activated_at as activate_date
+        FROM products
+        WHERE type = 'insightsplusproduct'
+        GROUP BY merchant_location_id) as A
+        
+    LEFT JOIN(
+        SELECT *
+        FROM(
+            SELECT merchant_location_id ml2, product_id as product_id2, effective_at as downgrade_date
+            FROM product_activities
+            WHERE action_code % 2 = 1
+            ORDER BY effective_at DESC) as B1
+        GROUP BY ml2) as B2
+        
+    ON A.product_id = B2.product_id2
+
+	LEFT JOIN(
+		SELECT id as ml3, claimed_at
+		FROM merchant_locations) as C
+
+	ON A.merchant_location_id = C.ml3
+
+	LEFT JOIN(
+		SELECT merchant_location_id ml4, processor_merchant_id MID, mid_provider_id
+		FROM credit_card_processor_merchants) as D
+	
+	ON A.merchant_location_id = D.ml4
+	
+	LEFT JOIN(
+		SELECT id partner_id, name as partner_name
+		FROM partners) as E
+	
+	ON D.mid_provider_id = E.partner_id
+	
+where downgrade_date between '2015-07-01' AND '2015-07-31' and claimed_at is not null;
