@@ -1,0 +1,60 @@
+select mlid 'Merchant Location', M1.mid 'MID', merchant_call_status 'Merchant Call Status', signer_full_name 'Full Name', 
+       phone 'Primary Phone', concat('https://control.womply.com/#', + M1.mid) as 'Control Center', price 'Price', 
+       free_trial_detail 'Free Trial Detail', dba_name 'Company Name', dba_address_1 'Address 1', dba_address_2 'Address 2', 
+       dba_city 'City', dba_state 'State', dba_country 'Country', dba_zip 'Zip',
+       dba_phone_2 'Alternate Phone', dba_email 'Email', sales_agent 'Sales Agent', source 'Source'
+from (
+(select *
+   from(
+       (select id ccpm_id, merchant_location_id mlid, processor_merchant_id mid, merchant_call_status, price
+       from credit_card_processor_merchants
+       where id in (
+           select credit_card_processor_merchant_id ccpm_id
+           from ccpm_details
+           where free_trial_detail like '%2015114 USMS Monthly MID Selection - 12/15/2015 29.99')) LH
+       
+       LEFT JOIN
+       (select id mlid1, phone, signer_full_name
+       from merchant_locations) RH1
+       ON LH.mlid = RH1.mlid1
+       
+       LEFT JOIN
+       (select credit_card_processor_merchant_id ccpm_id2, free_trial_detail
+       from ccpm_details) RH2
+       ON LH.ccpm_id = RH2.ccpm_id2
+   )) M1
+LEFT JOIN
+       
+(select *
+    from (
+        select *
+        from
+            (select  mid, dba_name, dba_address_1, dba_address_2, dba_city, dba_state, dba_country, dba_zip, 
+                    dba_phone_2, dba_email, sales_agent, source,
+                case 
+                    when dba_phone_2 is null then 0
+                    else 1
+                end +
+                case 
+                    when dba_email is null then 0
+                    else 2
+                end +
+               case 
+                    when sales_agent is null then 0
+                    else 8
+                end +
+               case
+                    when source is null then 0
+                   else 4
+                end
+                as row_goodness    
+            from usms_merchants
+            where mid in (
+                select processor_merchant_id
+                from credit_card_processor_merchants ccpm left join ccpm_details on ccpm.id = ccpm_details.credit_card_processor_merchant_id
+                where free_trial_detail like '%2015114 USMS Monthly MID Selection - 12/15/2015 29.99')) A
+        order by mid, row_goodness desc
+    ) B
+GROUP BY mid) M2
+ON M1.mid = M2.mid
+)
