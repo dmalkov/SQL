@@ -1,0 +1,63 @@
+SELECT merchant_location, mid, partner_name, claim_date, downgrade_date, est_free_trial_date, greatest(0, datediff(downgrade_date, est_free_trial_date)) days_paid, downgrade_reason, claim_week, claim_month, claim_year, downgrade_week, downgrade_year
+FROM(
+	SELECT ml merchant_location, mid, partner_name, date(claim_date) claim_date, date(downgrade_date) downgrade_date, 
+		CASE
+			WHEN claim_date < date_format('2015-06-01', '%Y-%m-%d') THEN
+				date_format(concat(year(adddate(claim_date,interval 2 month)),'-',month(adddate(claim_date,interval 2 month)),'-01'), '%Y-%m-%d')
+			WHEN day(claim_date) <= 15 THEN 
+				date_format(concat(year(adddate(claim_date,interval 1 month)),'-',month(adddate(claim_date,interval 1 month)),'-15'), '%Y-%m-%d')
+			ELSE
+				date_format(concat(year(adddate(claim_date,interval 2 month)),'-',month(adddate(claim_date,interval 2 month)),'-15'), '%Y-%m-%d')
+		END as est_free_trial_date,
+		
+		downgrade_reason,
+		
+		(week(claim_date, 2)) claim_week, (month(claim_date)) claim_month, (year(claim_date)) claim_year, downgrade_week, downgrade_year
+
+	FROM(
+			(SELECT merchant_location_id ml, min(used_at) claim_date
+			FROM mid_verification_codes
+			WHERE used_at is not null
+			GROUP BY merchant_location_id) LH
+
+		LEFT JOIN
+			(SELECT mlid ml1, downgrade_date, downgrade_week, downgrade_year
+			FROM(
+				SELECT mlid, "Insights Essentials Deactivated" as action, deactivate_date as downgrade_date, (week(deactivate_date, 2)) downgrade_week, (year(deactivate_date)) downgrade_year
+				FROM(
+					(SELECT merchant_location_id mlid, id as prod_id1
+					FROM products
+					WHERE type = 'insightsplusproduct') RH1a
+
+					INNER JOIN
+						(SELECT product_id as prod_id2, 'Deactivated' as action, created_at as deactivate_date
+						FROM product_activities
+						WHERE action_code % 2 = 1
+						) RH1b
+						
+					ON RH1a.prod_id1 = RH1b.prod_id2
+				)
+				ORDER BY mlid, downgrade_date DESC
+			) A
+			GROUP BY mlid) RH1
+		ON LH.ml = RH1.ml1
+		
+		LEFT JOIN
+			(SELECT merchant_location_id ml2, processor_merchant_id mid, id ccpm_id2, mid_provider_id partner_id2
+			FROM credit_card_processor_merchants
+			GROUP BY merchant_location_id) RH2
+		ON LH.ml = RH2.ml2
+		
+		LEFT JOIN
+			(SELECT credit_card_processor_merchant_id ccpm_id3, downgrade_reason
+			FROM ccpm_details) RH3
+		ON RH2.ccpm_id2 = RH3.ccpm_id3
+
+		LEFT JOIN
+			(SELECT id partner_id4, name partner_name
+			FROM partners) RH4
+		ON RH2.partner_id2 = RH4.partner_id4
+	)
+) A
+where (downgrade_date is null) or ((downgrade_reason is null) or (downgrade_reason = 'Merchant Downgrade Request'))
+;
