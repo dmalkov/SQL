@@ -1,0 +1,28 @@
+SELECT ml, claim_date, downgrade_date, partner_name, downgrade_reason
+FROM(
+		(SELECT merchant_location_id ml, used_at claim_date
+		FROM
+			(SELECT *
+			FROM mid_verification_codes
+			WHERE used_at is not null
+			ORDER BY id) A
+		GROUP BY merchant_location_id) LH
+
+	LEFT JOIN
+		(SELECT *
+		FROM(
+			SELECT pa.merchant_location_id ml1, effective_at downgrade_date
+			FROM product_activities pa LEFT JOIN products on pa.product_id = products.id
+			WHERE type = 'InsightsPlusProduct' and action_code % 2 = 1
+			ORDER BY pa.merchant_location_id, pa.effective_at DESC) A
+		GROUP BY ml1) RH1
+	ON LH.ml = RH1.ml1
+    
+    LEFT JOIN
+		(SELECT merchant_location_id ml2, name partner_name, downgrade_reason
+		FROM credit_card_processor_merchants ccpm 
+			LEFT JOIN partners on ccpm.mid_provider_id = partners.id
+            LEFT JOIN ccpm_details on ccpm.id = ccpm_details.credit_card_processor_merchant_id
+        GROUP BY merchant_location_id) RH2
+	ON LH.ml = RH2.ml2
+);
