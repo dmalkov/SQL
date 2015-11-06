@@ -1,0 +1,140 @@
+#!/usr/bin/env python
+
+from datetime import datetime as dt
+from datetime import timedelta as td
+import pandas as pd
+import numpy as np
+from sqlalchemy import *
+import re
+import csv
+from collections import Counter
+
+def womply_engine():
+    DB_URI = "mysql://{user}:{password}@{host}:{port}/{db}"
+    
+    engine = create_engine(DB_URI.format(
+      user ='reports',
+      password = 'honeybadger2015',
+      host = '10.0.2.100',
+      port = '3306',
+      db = 'womply')
+      )
+    return engine
+
+def get_results(query):
+    # Generic SQL request based on provided query
+    engine = womply_engine()
+    connection = engine.connect()
+    result = connection.execute(text(query))
+    connection.close()
+
+    return result
+
+def get_data():
+	headers = ['merchant_location',	'mid', 'partner_name', 'claim_date', 'downgrade_date',\
+			   'est_free_trial_date', 'days_paid', 'downgrade_reason', 'claim_week', 'claim_month', \
+			   'claim_year', 'downgrade_week', 'downgrade_year']
+	
+	query_loc = '../Query/Denis_new_churn_query.sql'
+
+	with open(query_loc, 'r') as f:
+		query = f.read()
+
+	query = re.sub('[\n\t]', ' ', query)
+	results = get_results(query)
+
+	data = [row for row in results]
+	df = pd.DataFrame(data, columns = headers)
+
+	return df
+
+def get_som(month, year):
+	if year < 2015:
+		som = dt(year, month, 1)
+	elif month < 7:
+		som = dt(year, month, 1)
+	else:
+		som = dt(year, month, 15)
+	return som
+
+def get_eom(month, year):
+	if year < 2015:
+		eom = dt(year, month+1, 1) - td(days = 1)
+	elif month < 6:
+		eom = dt(year, month+1, 1) - td(days = 1)
+	else:
+		eom = dt(year, month + 1, 14)
+	return eom
+
+def count_paying(df, month, year):
+	som = get_som(month, year)
+	eom = get_eom(month, year)
+	keep = []
+	df.est_free_trial_date = pd.to_datetime(df.est_free_trial_date)
+	df = df[df.est_free_trial_date < som]
+	# df = df[df.downgrade_reason == 'Merchant Downgrade Request']
+	dg = []
+
+	for row in df.index:
+		dat = df.ix[row,]
+		dg_date = dat.downgrade_date
+		if dg_date == None:
+			keep.append(True)
+		elif dg_date >= dt.date(som):
+			keep.append(True)
+		else:
+			keep.append(False)
+
+		if dg_date == None:
+			dg.append(False)
+		elif (dg_date >= dt.date(som)) & (dg_date <= dt.date(eom)):
+			dg.append(True)
+		else:
+			dg.append(False)
+
+	return df[keep], df[dg]
+	
+month = 1
+year = 2015
+
+cur_month = dt.now().month
+cur_year = dt.now().year
+
+df = get_data()
+
+counts = []
+dgs = []
+dates = []
+soms = []
+eoms = []
+
+while ((month <= cur_month) & (year == cur_year)) | (year < cur_year):
+	month_starting = dt.strftime(get_som(month, year), '%Y-%m-%d')
+	month_ending = dt.strftime(get_eom(month, year), '%Y-%m-%d')
+
+	count, dg = count_paying(df, month, year)
+	counts.append(len(count))
+	dgs.append(len(dg))
+	dates.append(month_starting)
+	soms.append(month_starting)
+	eoms.append(month_ending)
+
+	if month == 12:
+		month = 1
+		year += 1
+	else:
+		month += 1
+
+data = pd.DataFrame()
+data['date'] = dates
+data['count'] = counts
+data['dgs'] = dgs
+data['rate'] = data['dgs'] / data['count']
+data['som'] = soms
+data['eom'] = eoms
+
+annualized = [1-(1-i)**12 for i in data['rate']]
+data['annualized'] = annualized
+
+print data
+
