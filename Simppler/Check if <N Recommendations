@@ -1,0 +1,8 @@
+select u.id, u.email, count(distinct tc.id), count(distinct e.id)
+from simplrcore_user u
+left join connections_topconnection tc on tc.user_id = u.id
+left join simplrcore_edge e on e.from_user_id = u.id
+where u.organization_id = 81
+and u.type_id = 2
+group by tc.user_id, u.email
+having count(distinct e.id) > 0;
