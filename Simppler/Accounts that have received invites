@@ -1,0 +1,4 @@
+select *
+from onboarding_user
+where organization_id = 81
+and account_created = 0 and invitation_attempts < 3;
