@@ -1,0 +1,8 @@
+SELECT first_name, last_name, email, updated_at AS signed_up_date 
+
+FROM onboarding_user 
+
+WHERE updated_at > '2016-12-13 00:00:00' AND updated_at < '2016-12-31 23:59:59' 
+AND organization_id=54 
+AND account_created=1 
+AND invitation_sent=1
