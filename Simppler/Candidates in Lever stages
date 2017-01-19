@@ -1,0 +1,9 @@
+select count(l.id),l.lever_stage_name 
+
+FROM lever_usermapping l
+
+join simplrcore_job j on l.`simppler_job_id`=j.id
+
+where j.organization_id=77 
+
+GROUP BY l.lever_stage_name;
