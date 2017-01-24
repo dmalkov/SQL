@@ -1,12 +1,9 @@
-SELECT gum.*, 
-u2.formatted_name 
+SELECT count(gum.id),gum.greenhouse_stage
 
 FROM greenhouse_usermapping gum 
 
-INNER JOIN simplrcore_user u ON u.organization_id = 69 
-INNER JOIN simplrcore_user u2 ON u2.id = gum.simppler_user_id 
+join simplrcore_job j on gum.`simppler_job_id`=j.id
 
-WHERE gum.greenhouse_stage IS NOT NULL 
+where j.organization_id=88 
 
-GROUP BY gum.simppler_user_id, gum.greenhouse_stage 
-ORDER BY gum.greenhouse_stage;
+GROUP BY gum.greenhouse_stage;
