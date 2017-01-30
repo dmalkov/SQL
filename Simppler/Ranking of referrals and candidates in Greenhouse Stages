@@ -1,0 +1,13 @@
+SELECT count(u2.id) as frequency, u2.formatted_name as referrer, u.formatted_name as referral, j.title, ref.stage as simppler_stage, gum.greenhouse_status, gum.greenhouse_stage as gh_stage
+
+FROM greenhouse_usermapping gum 
+
+JOIN simplrcore_job j on gum.simppler_job_id=j.id
+JOIN simplrcore_user u ON u.id=gum.simppler_user_id
+JOIN simplrcore_jobreferrals ref ON ref.id=gum.job_referral_id
+JOIN simplrcore_user u2 ON u2.id=ref.referrer_id
+
+WHERE j.organization_id=88
+
+GROUP BY referrer
+ORDER BY count(u2.id) desc
