@@ -1,0 +1,10 @@
+SELECT u2.formatted_name as referrer, u.formatted_name as referral, j.title, ref.stage as simppler_stage, lev.lever_stage_name as lever_stage
+
+FROM lever_usermapping lev
+
+JOIN simplrcore_job j on lev.simppler_job_id=j.id
+JOIN simplrcore_user u ON u.id=lev.simppler_user_id
+JOIN simplrcore_jobreferrals ref ON ref.id=lev.job_referral_id
+JOIN simplrcore_user u2 ON u2.id=ref.referrer_id
+
+WHERE j.organization_id=84
