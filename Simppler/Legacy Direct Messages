@@ -1,0 +1,14 @@
+SELECT conv.created_at as created_date, u2.formatted_name as "referrer name", u.formatted_name as "referral name", j.title
+
+FROM simplrcore_jobconversations conv
+
+JOIN simplrcore_job j ON j.id=conv.job_id
+JOIN simplrcore_user u ON u.id=conv.to_id
+JOIN simplrcore_user u2 ON u2.id=conv.from_user_id
+
+WHERE j.organization_id=81
+
+/*AND u.type_id = 3
+
+GROUP BY u.formatted_name
+ORDER BY j.title*/
