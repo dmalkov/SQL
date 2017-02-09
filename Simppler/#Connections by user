@@ -1,0 +1,10 @@
+SELECT first_name, last_name, email, count(e.from_user_id) as connections, previous_login
+
+FROM simplrcore_edge e
+
+JOIN simplrcore_user su ON su.id=e.from_user_id
+/*JOIN simplrcore_location loc ON loc.id=su.location_id*/
+
+WHERE organization_id=54 
+
+GROUP BY su.email
