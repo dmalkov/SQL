@@ -1,0 +1,13 @@
+SELECT o.first_name, o.last_name, o.email, ut.value as user_type, saw_onboarding_page, account_created, last_invitation_sent_on_date as last_invite, o.updated_at AS signed_up_date 
+
+FROM onboarding_user o
+
+JOIN simplrcore_user u ON u.email=o.email
+JOIN onboarding_userchecklist uc ON uc.user_id=u.id
+JOIN simplrcore_usertype ut ON ut.id=u.type_id
+
+WHERE o.organization_id=111
+
+AND invitation_sent=1
+AND saw_onboarding_page=1
+AND ut.id=2
