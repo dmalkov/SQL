@@ -1,4 +1,4 @@
-SELECT msg.updated_at as reply_date, u.formatted_name as "message from", u2.formatted_name as "candidate response"
+SELECT msg.updated_at as reply_date, u.formatted_name as "message from", u2.formatted_name as "message to"
 
 FROM messaging_message msg
 
@@ -6,6 +6,5 @@ JOIN simplrcore_user u ON u.id=msg.sender_id
 JOIN simplrcore_user u2 ON u2.id=msg.recipient_id
 
 WHERE msg.organization_id=81
-AND u.type_id = 2
 
-GROUP BY u.formatted_name
+ORDER BY reply_date desc
