@@ -1,0 +1,11 @@
+SELECT j.title, count(j.title) as freq
+
+FROM greenhouse_usermapping gum 
+
+JOIN simplrcore_job j on gum.simppler_job_id=j.id
+JOIN simplrcore_jobreferrals ref ON ref.id=gum.job_referral_id
+
+WHERE j.organization_id=101
+
+GROUP BY j.title
+ORDER BY count(j.title) desc
