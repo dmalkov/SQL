@@ -1,6 +1,7 @@
-select distinct u.formatted_name, u.email, t.formatted_name, ue.email
+select distinct u.formatted_name as "sender", u.email as "sender email", u.type_id, t.formatted_name "recipient", ue.email as "recipient email", t.type_id
 
 from simplrcore_jobconversations jc
+
 inner join simplrcore_user u on u.id = jc.from_user_id
 inner join simplrcore_user t on t.id = jc.to_id
 left join simplrcore_useremails ue on ue.user_id = t.id
