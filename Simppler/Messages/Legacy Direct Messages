@@ -1,15 +1,9 @@
-SELECT conv.created_at as created_date, u.formatted_name as "referral name", u2.formatted_name as "referrer name", j.title
+select distinct u.formatted_name, u.email, t.formatted_name, ue.email
 
-FROM simplrcore_jobconversations conv
+from simplrcore_jobconversations jc
+inner join simplrcore_user u on u.id = jc.from_user_id
+inner join simplrcore_user t on t.id = jc.to_id
+left join simplrcore_useremails ue on ue.user_id = t.id
 
-JOIN simplrcore_job j ON j.id=conv.job_id
-JOIN simplrcore_user u ON u.id=conv.to_id
-JOIN simplrcore_user u2 ON u2.id=conv.from_user_id
-
-JOIN greenhouse_usermapping gum ON gum.simppler_user_id=u2.id
-
-WHERE j.organization_id=81
-/*AND u.type_id = 3
-
-GROUP BY u.formatted_name
-ORDER BY j.title*/
+where u.organization_id = 101
+order by t.formatted_name
