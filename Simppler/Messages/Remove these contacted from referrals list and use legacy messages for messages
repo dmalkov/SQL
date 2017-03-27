@@ -1,0 +1,18 @@
+SELECT u2.formatted_name as referrer, u.formatted_name as referral, j.title, u.last_activity, if(cs.stage=15,"Passive",if(cs.stage=20,"Contacted",if(cs.stage=30,"Active","Pushed"))) as "Contact Type", ref.stage as simppler_stage, gum.greenhouse_status, u.type_id, gum.greenhouse_stage as gh_stage
+
+FROM greenhouse_usermapping gum 
+
+JOIN simplrcore_job j on gum.simppler_job_id=j.id
+JOIN simplrcore_user u ON u.id=gum.simppler_user_id
+JOIN simplrcore_jobreferrals ref ON ref.id=gum.job_referral_id
+JOIN simplrcore_user u2 ON u2.id=ref.referrer_id
+INNER JOIN talent_radar_contactstage cs on cs.contact_id=u.id
+
+WHERE j.organization_id=101
+
+/*leads = 0
+archived = 10
+passive = 15
+contacted = 20
+active = 30
+pushed = 40*/
