@@ -1,10 +1,12 @@
-select distinct u.formatted_name as "sender", u.email as "sender email", u.type_id, t.formatted_name "recipient", ue.email as "recipient email", t.type_id
+select distinct u.formatted_name as "sender", u.email as "sender email", if(u.type_id=1, "Recruiter",if(u.type_id=2,"Employee","Candidate")) as "sender type", t.formatted_name "recipient", ue.email as "recipient email", if(t.type_id=1, "Recruiter",if(t.type_id=2,"Employee","Candidate")) as "recipient type", gum.greenhouse_stage
 
 from simplrcore_jobconversations jc
 
 inner join simplrcore_user u on u.id = jc.from_user_id
 inner join simplrcore_user t on t.id = jc.to_id
 left join simplrcore_useremails ue on ue.user_id = t.id
+left join greenhouse_usermapping gum on gum.simppler_user_id=t.id
+left join talent_radar_contactstage cs on cs.contact_id=u.id
 
-where u.organization_id = 101
+where u.organization_id = 51
 order by t.formatted_name
