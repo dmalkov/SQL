@@ -1,5 +1,5 @@
-SELECT o.first_name, o.last_name, o.email, ut.value as user_type, saw_onboarding_page, account_created, last_invitation_sent_on_date as last_invite, o.updated_at AS signed_up_date 
 
+SELECT o.first_name, o.last_name, o.email, ut.value as user_type, saw_onboarding_page as "opened email", account_created as "account created"/*, count(e.from_user_id) as connections*/, last_invitation_sent_on_date as created_date, o.updated_at AS signed_up_date 
 FROM onboarding_user o
 
 JOIN simplrcore_user u ON u.email=o.email
