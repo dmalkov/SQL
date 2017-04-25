@@ -4,21 +4,26 @@ jr.updated_at,
 u.formatted_name AS referrer, 
 u2.formatted_name AS referral, 
 ue.email, j.title,
+if(cs.stage=15,"endorsement",if(cs.stage=20,"contacted",if(cs.stage=30,"active",if(cs.stage=40,"pushed","lead")))) as "type",
 jr.stage,
-if(cs.stage=15,"endorsement",if(cs.stage=20,"contacted",if(cs.stage=30,"active",if(cs.stage=40,"pushed","lead")))) as "type"
+gum.greenhouse_stage
+/*USE IF LEVER ENABLED........ lum.lever_stage_name */
 
 FROM simplrcore_jobreferrals jr
 
-INNER JOIN simplrcore_user u ON u.id=jr.referrer_id 
-INNER JOIN simplrcore_user u2 ON u2.id=jr.referral_id 
-INNER JOIN simplrcore_job j ON j.id=jr.job_id 
-INNER JOIN talent_radar_contactstage cs ON cs.contact_id=u2.id
-INNER JOIN simplrcore_useremails ue ON ue.user_id=u2.id
+LEFT JOIN simplrcore_user u ON u.id=jr.referrer_id 
+LEFT JOIN simplrcore_user u2 ON u2.id=jr.referral_id 
+LEFT JOIN simplrcore_job j ON j.id=jr.job_id 
+LEFT JOIN talent_radar_contactstage cs ON cs.contact_id=u2.id
+LEFT JOIN simplrcore_useremails ue ON ue.user_id=u2.id
+
+LEFT JOIN greenhouse_usermapping gum ON gum.job_referral_id=jr.id
+/*USE IF LEVER ENABLED........ LEFT JOIN lever_usermapping lum ON lum.job_referral_id=jr.id */
  
-WHERE u.organization_id=109
+WHERE u.organization_id=111
 
 /*ONLY IF REFERRER IS IN MORE THAN ONE ORGANIZATION*/
-GROUP BY ue.email 
+GROUP BY u2.id
 
 /* 
 leads = 0
