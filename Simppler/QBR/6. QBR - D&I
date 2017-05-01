@@ -1,0 +1,22 @@
+SELECT 
+
+jr.created_at,
+u.formatted_name as referrer,
+u2.formatted_name as referral, 
+
+CASE WHEN u2.gender IS NULL
+	THEN gen.gender 
+	ELSE u2.gender END as gender,
+
+e.email, 
+j.title
+
+FROM simplrcore_jobreferrals jr
+
+LEFT JOIN simplrcore_user u ON u.id=jr.referrer_id 
+LEFT JOIN simplrcore_user u2 ON u2.id=jr.referral_id 
+LEFT JOIN simplrcore_job j ON j.id=jr.job_id 
+LEFT JOIN simplrcore_useremails e ON e.user_id=u2.id
+LEFT JOIN diversity_inferredgender gen ON gen.user_id=u2.id
+
+WHERE j.organization_id=109
