@@ -1,12 +1,14 @@
-SELECT u2.formatted_name as referrer, count(u2.formatted_name) as freq
+SELECT 
 
-FROM greenhouse_usermapping gum 
+u.formatted_name as referrer,
+count(u.formatted_name) as freq
 
-JOIN simplrcore_job j on gum.simppler_job_id=j.id
-JOIN simplrcore_jobreferrals ref ON ref.id=gum.job_referral_id
-JOIN simplrcore_user u ON u.id=gum.simppler_user_id
-JOIN simplrcore_user u2 ON u2.id=ref.referrer_id
+FROM simplrcore_jobreferrals jr
 
-WHERE j.organization_id=101
-GROUP BY u2.formatted_name
-ORDER BY count(u2.formatted_name) desc
+LEFT JOIN simplrcore_user u ON u.id=jr.referrer_id 
+LEFT JOIN simplrcore_user u2 ON u2.id=jr.referral_id 
+LEFT JOIN simplrcore_job j ON j.id=jr.job_id 
+
+WHERE j.organization_id=109
+GROUP BY u.formatted_name
+ORDER BY count(u.formatted_name) desc
