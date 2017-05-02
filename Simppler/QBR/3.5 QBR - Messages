@@ -1,0 +1,11 @@
+SELECT msg.updated_at as reply_date, u.formatted_name as "from employee", u2.formatted_name as "recipient"
+
+FROM messaging_message msg
+
+JOIN simplrcore_user u ON u.id=msg.sender_id
+JOIN simplrcore_user u2 ON u2.id=msg.recipient_id
+
+WHERE msg.organization_id=109
+AND u.type_id = 2
+
+GROUP BY recipient
