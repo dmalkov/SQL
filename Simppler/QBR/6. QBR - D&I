@@ -19,4 +19,6 @@ LEFT JOIN simplrcore_job j ON j.id=jr.job_id
 LEFT JOIN simplrcore_useremails e ON e.user_id=u2.id
 LEFT JOIN diversity_inferredgender gen ON gen.user_id=u2.id
 
-WHERE j.organization_id=109
+WHERE j.organization_id=81
+
+GROUP BY u2.id
