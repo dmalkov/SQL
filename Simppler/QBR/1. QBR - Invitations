@@ -6,7 +6,7 @@ ut.value as user_type,
 o.invitation_attempts as "invitations",
 saw_onboarding_page as "opened email", 
 account_created as "account created",
-count(e.from_user_id) as connections, 
+count(distinct e.to_user_id) as connections, 
 last_invitation_sent_on_date as created_date, 
 o.updated_at AS signed_up_date
 
@@ -17,6 +17,8 @@ LEFT JOIN onboarding_userchecklist uc ON uc.user_id=u.id
 LEFT JOIN simplrcore_usertype ut ON ut.id=u.type_id
 LEFT JOIN simplrcore_edge e ON e.from_user_id=u.id
 
-WHERE o.organization_id=111
+WHERE o.organization_id=88
+AND u.is_active=True
+
 GROUP BY u.id
 ORDER BY o.last_name
