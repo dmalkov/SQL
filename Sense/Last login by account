@@ -1,0 +1,11 @@
+SELECT 
+a.name,
+MAX(la.time_created) as last_login
+
+FROM login_audit la
+
+INNER JOIN agency a ON a.id=la.agency_id
+
+WHERE a.active_event_processor = 1
+GROUP BY a.name
+ORDER BY a.name
