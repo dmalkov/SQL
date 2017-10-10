@@ -1,0 +1,11 @@
+SELECT 
+a.name,
+count(w.name) as workflow_count
+
+FROM workflow w
+
+LEFT JOIN agency a ON a.id=w.agency_id
+
+WHERE a.active_event_processor = 1
+GROUP BY a.name
+ORDER BY a.name
