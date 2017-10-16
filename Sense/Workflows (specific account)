@@ -1,0 +1,12 @@
+SELECT 
+a.name,
+w.name as workflows,
+active
+
+FROM workflow w
+
+LEFT JOIN agency a ON a.id=w.agency_id
+
+WHERE a.id = 7239707641316969410
+
+ORDER BY w.active DESC
