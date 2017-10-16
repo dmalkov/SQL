@@ -1,0 +1,5 @@
+select d.id, d.audience_member_id, d.audience_member_placement_id, d.event_id,
+  substring(e.event_data, locate('"title":', e.event_data) + 8,
+            locate(', "', e.event_data, locate('"title":', e.event_data)) - locate('"title":', e.event_data) -
+            8) AS event_title,
+  d.time_created from sent_event d, event e where d.event_id = e.id;
