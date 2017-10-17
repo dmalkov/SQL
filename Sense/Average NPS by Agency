@@ -1,0 +1,18 @@
+SELECT 
+erm.agency_id,
+a.name,
+erm.response_module_type,
+cast(avg(erm.module_value) as decimal(10,2)) as 'NPS (average)'
+
+from event_response_module erm
+
+left join agency a on a.id=erm.agency_id
+
+where erm.is_debug = 0
+and erm.agency_id <> 1
+and erm.response_module_type = 'rating_scale_survey_answer'
+
+group by erm.agency_id
+order by a.name ASC
+
+
