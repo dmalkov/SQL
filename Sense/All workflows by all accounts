@@ -1,0 +1,24 @@
+SELECT 
+	se.id, 
+	w.agency_id as agency_id,
+	a.name as 'agency name',
+	se.audience_member_id, 
+	se.event_id,
+	e.event_type,
+    substring(e.event_data, locate('"title":', e.event_data) + 8,
+		locate(', "', e.event_data, locate('"title":', e.event_data)) - locate('"title":', e.event_data) - 8) AS event_title,
+	CAST(se.time_created AS DATE) as created,
+	CAST(se.time_delivered AS DATE) as delivered,
+	CAST(se.time_opened AS DATE) as opened,
+	CAST(se.time_clicked AS DATE) as clicked,
+	CAST(se.time_responded AS DATE) as responded
+  
+FROM sent_event se, event e 
+
+LEFT JOIN workflow w ON w.id=e.workflow_id
+LEFT JOIN agency a ON a.id=w.agency_id
+
+WHERE 
+se.event_id = e.id
+AND se.is_debug = 0
+AND (se.time_created >= '2017-07-01' AND se.time_created < '2017-10-01')
